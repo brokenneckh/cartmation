@@ -1,0 +1,47 @@
+﻿{% extends 'base.html' %}
+{% block title %}Subscription Plans - Cartmation{% endblock %}
+{% block content %}
+<div class="detail-content">
+    <div class="text-center mb-5">
+        <h1 class="fw-bold" style="font-size:2.2rem;">Choose your plan</h1>
+        <p style="color:#b3b3b3;">Watch anywhere. Cancel anytime.</p>
+    </div>
+    <div class="row g-4 justify-content-center">
+        {% for plan in plans %}
+        <div class="col-12 col-md-6 col-lg-3">
+            <div class="plan-card {% if plan.recommended %}recommended{% endif %}">
+                {% if plan.recommended %}
+                <div class="text-center mb-3">
+                    <span style="background:#1db954; color:#000; padding:4px 14px; border-radius:500px; font-size:0.75rem; font-weight:700;">RECOMMENDED</span>
+                </div>
+                {% endif %}
+                <h4 class="fw-bold" style="color:#1db954;">{{ plan.name }}</h4>
+                <div class="my-3">
+                    <span style="font-size:2.2rem; font-weight:900;">{{ plan.price }}</span>
+                    <span style="color:#6a6a6a;"> / {{ plan.period }}</span>
+                </div>
+                <hr style="border-color:#282828;">
+                <ul class="list-unstyled mt-3 mb-4">
+                    {% for feature in plan.features %}
+                    <li class="mb-2" style="font-size:0.875rem; color:#b3b3b3;">
+                        <i class="fas fa-check me-2" style="color:#1db954;"></i>{{ feature }}
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% if user.is_authenticated %}
+                <button class="btn-green w-100 py-2 border-0 rounded-pill fw-bold"
+                    onclick="alert('{{ plan.name }} plan - coming soon!')">
+                    {% if plan.name == 'Free' %}Get Started{% else %}Subscribe{% endif %}
+                </button>
+                {% else %}
+                <a href="{% url 'register' %}" class="btn-green d-block text-center py-2 rounded-pill fw-bold text-decoration-none">Get Started</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="text-center mt-5" style="color:#6a6a6a; font-size:0.85rem;">
+        <i class="fas fa-lock me-2"></i>Secure payment &bull; Cancel anytime &bull; No hidden fees
+    </div>
+</div>
+{% endblock %}

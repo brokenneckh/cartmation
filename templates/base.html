@@ -1,0 +1,89 @@
+﻿{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Cartmation{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+{% if user.is_authenticated %}
+<!-- TOP NAVBAR -->
+<nav class="cartmation-nav" id="mainNav">
+    <div class="nav-inner">
+        <div class="nav-left">
+            <a href="{% url 'home' %}" class="nav-logo">CARTMATION</a>
+            <ul class="nav-links">
+                <li><a href="{% url 'home' %}">Home</a></li>
+                <li><a href="{% url 'browse' %}?type=series">TV Shows</a></li>
+                <li><a href="{% url 'browse' %}?type=movie">Movies</a></li>
+                <li><a href="{% url 'browse' %}?type=series&genre=9">Anime</a></li>
+                <li><a href="{% url 'browse' %}">Browse</a></li>
+            </ul>
+        </div>
+        <div class="nav-right">
+            <div class="nav-search">
+                <i class="fas fa-search nav-search-icon"></i>
+                <form action="{% url 'browse' %}" method="get">
+                    <input type="search" name="q" id="searchInput" placeholder="Titles, people, genres" autocomplete="off">
+                </form>
+                <div id="searchDropdown" class="search-suggestions-box"></div>
+            </div>
+            <div class="nav-dropdown">
+                <div class="nav-avatar">{{ user.username|first|upper }}</div>
+                <div class="nav-dropdown-menu">
+                    <a href="{% url 'profile_list' %}"><i class="fas fa-users"></i> Profiles</a>
+                    <a href="{% url 'account_settings' %}"><i class="fas fa-cog"></i> Settings</a>
+                    <hr>
+                    <a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Sign Out</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<div class="main-content">
+    {% if messages %}
+    <div class="container-fluid px-4 pt-3">
+        {% for message in messages %}
+        <div class="alert alert-{% if 'success' in message.tags %}success{% else %}danger{% endif %} alert-dismissible fade show">
+            {{ message }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% block content %}{% endblock %}
+    <footer class="cartmation-footer">
+        <div class="footer-links">
+            <a href="#">FAQ</a>
+            <a href="#">Help Centre</a>
+            <a href="#">Privacy</a>
+            <a href="#">Terms</a>
+            <a href="{% url 'account_settings' %}">Account</a>
+        </div>
+        <p class="footer-logo">CARTMATION</p>
+    </footer>
+</div>
+
+{% else %}
+{% if messages %}
+<div class="container mt-2">
+    {% for message in messages %}
+    <div class="alert alert-{% if 'success' in message.tags %}success{% else %}danger{% endif %} alert-dismissible fade show">
+        {{ message }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% block auth_content %}{% endblock %}
+{% endif %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{% static 'js/main.js' %}"></script>
+</body>
+</html>

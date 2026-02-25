@@ -1,0 +1,203 @@
+﻿{% extends 'base.html' %}
+{% block title %}Cartmation - Watch TV Shows Online, Watch Movies Online{% endblock %}
+{% block content %}
+
+<!-- HERO SLIDESHOW -->
+<div class="hero-slideshow" id="heroSlideshow">
+    {% for movie in featured_list %}
+    <div class="hero-slide {% if forloop.first %}active{% endif %}" 
+         style="background-image: url('{% if movie.banner %}{{ movie.banner.url }}{% else %}https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1920&q=80{% endif %}');">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <div class="hero-badge"><i class="fas fa-fire"></i> {% if forloop.first %}Featured{% else %}Trending{% endif %}</div>
+            <h1 class="hero-title">{{ movie.title }}</h1>
+            <p class="hero-desc">{{ movie.description }}</p>
+            <div class="hero-meta">
+                <span class="hero-rating">⭐ {{ movie.avg_rating }}</span>
+                <span class="hero-year">{{ movie.release_year }}</span>
+                {% if movie.duration %}<span class="hero-duration">{{ movie.duration }}</span>{% endif %}
+            </div>
+            <div class="hero-btns">
+                <a href="{% url 'watch_movie' movie.pk %}" class="btn-play"><i class="fas fa-play"></i> Play</a>
+                <a href="{% url 'movie_detail' movie.pk %}" class="btn-info"><i class="fas fa-info-circle"></i> More Info</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    <!-- Slideshow Controls -->
+    <div class="hero-dots" id="heroDots">
+        {% for movie in featured_list %}
+        <span class="hero-dot {% if forloop.first %}active{% endif %}" data-index="{{ forloop.counter0 }}"></span>
+        {% endfor %}
+    </div>
+    <button class="hero-arrow hero-prev" id="heroPrev"><i class="fas fa-chevron-left"></i></button>
+    <button class="hero-arrow hero-next" id="heroNext"><i class="fas fa-chevron-right"></i></button>
+</div>
+
+{% if continue_watching %}
+<div class="content-section">
+    <div class="section-header">
+        <span class="section-title">▶ Continue Watching</span>
+    </div>
+    <div class="cards-scroll">
+        {% for item in continue_watching %}
+        <a href="{% url 'watch_movie' item.movie.pk %}" class="poster-card">
+            {% if item.movie.thumbnail %}
+            <img src="{{ item.movie.thumbnail.url }}" alt="{{ item.movie.title }}" class="poster-card-img">
+            {% else %}
+            <div class="poster-card-no-img">{{ item.movie.title }}</div>
+            {% endif %}
+            <div class="poster-card-body">
+                <div class="poster-card-title">{{ item.movie.title }}</div>
+                <div class="poster-card-meta"><i class="fas fa-clock me-1"></i>{{ item.watched_at|timesince }} ago</div>
+            </div>
+            <div class="progress-bar-watch"></div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+
+{% if trending %}
+<div class="content-section">
+    <div class="section-header">
+        <span class="section-title">🔥 Trending Now</span>
+        <a href="{% url 'browse' %}" class="section-link">See all <i class="fas fa-chevron-right"></i></a>
+    </div>
+    <div class="cards-scroll">
+        {% for movie in trending %}
+        <a href="{% url 'movie_detail' movie.pk %}" class="poster-card">
+            {% if movie.thumbnail %}<img src="{{ movie.thumbnail.url }}" alt="{{ movie.title }}" class="poster-card-img">
+            {% else %}<div class="poster-card-no-img">{{ movie.title }}</div>{% endif %}
+            <div class="poster-card-body">
+                <div class="poster-card-title">{{ movie.title }}</div>
+                <div class="poster-card-meta">{{ movie.release_year }} &bull; ⭐ {{ movie.avg_rating }}</div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{% if movies %}
+<div class="content-section">
+    <div class="section-header">
+        <span class="section-title">🎬 Movies</span>
+        <a href="{% url 'browse' %}?type=movie" class="section-link">See all <i class="fas fa-chevron-right"></i></a>
+    </div>
+    <div class="cards-scroll">
+        {% for movie in movies %}
+        <a href="{% url 'movie_detail' movie.pk %}" class="poster-card">
+            {% if movie.thumbnail %}<img src="{{ movie.thumbnail.url }}" alt="{{ movie.title }}" class="poster-card-img">
+            {% else %}<div class="poster-card-no-img">{{ movie.title }}</div>{% endif %}
+            <div class="poster-card-body">
+                <div class="poster-card-title">{{ movie.title }}</div>
+                <div class="poster-card-meta">{{ movie.release_year }} &bull; ⭐ {{ movie.avg_rating }}</div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{% if series %}
+<div class="content-section">
+    <div class="section-header">
+        <span class="section-title">📺 TV Series</span>
+        <a href="{% url 'browse' %}?type=series" class="section-link">See all <i class="fas fa-chevron-right"></i></a>
+    </div>
+    <div class="cards-scroll">
+        {% for movie in series %}
+        <a href="{% url 'movie_detail' movie.pk %}" class="poster-card">
+            {% if movie.thumbnail %}<img src="{{ movie.thumbnail.url }}" alt="{{ movie.title }}" class="poster-card-img">
+            {% else %}<div class="poster-card-no-img">{{ movie.title }}</div>{% endif %}
+            <div class="poster-card-body">
+                <div class="poster-card-title">{{ movie.title }}</div>
+                <div class="poster-card-meta">{{ movie.release_year }} &bull; ⭐ {{ movie.avg_rating }}</div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{% for genre in genres %}
+{% if genre.movies.count > 0 %}
+<div class="content-section">
+    <div class="section-header">
+        <span class="section-title">{{ genre.name }}</span>
+        <a href="{% url 'genre' genre.pk %}" class="section-link">See all <i class="fas fa-chevron-right"></i></a>
+    </div>
+    <div class="cards-scroll">
+        {% for movie in genre.movies.all|slice:":12" %}
+        <a href="{% url 'movie_detail' movie.pk %}" class="poster-card">
+            {% if movie.thumbnail %}<img src="{{ movie.thumbnail.url }}" alt="{{ movie.title }}" class="poster-card-img">
+            {% else %}<div class="poster-card-no-img">{{ movie.title }}</div>{% endif %}
+            <div class="poster-card-body">
+                <div class="poster-card-title">{{ movie.title }}</div>
+                <div class="poster-card-meta">{{ movie.release_year }} &bull; ⭐ {{ movie.avg_rating }}</div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+{% endfor %}
+
+{% if dhanush_movies %}
+<!-- DHANUSH COLLECTION HIGHLIGHT -->
+<div class="dhanush-collection">
+    <div class="dhanush-bg"></div>
+    <div class="dhanush-inner">
+        <div class="dhanush-header">
+            <div>
+                <div class="dhanush-badge">⭐ Actor Spotlight</div>
+                <h2 class="dhanush-title">Dhanush Collection</h2>
+                <p class="dhanush-desc">The finest films of the National Award-winning actor — raw, powerful and unforgettable.</p>
+            </div>
+            <a href="{% url 'browse' %}" class="dhanush-link">View All <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="cards-scroll dhanush-cards">
+            {% for movie in dhanush_movies %}
+            <a href="{% url 'movie_detail' movie.pk %}" class="dhanush-card">
+                {% if movie.thumbnail %}
+                <img src="{{ movie.thumbnail.url }}" alt="{{ movie.title }}" class="dhanush-card-img">
+                {% else %}
+                <div class="dhanush-card-no-img">{{ movie.title }}</div>
+                {% endif %}
+                <div class="dhanush-card-overlay">
+                    <div class="dhanush-card-title">{{ movie.title }}</div>
+                    <div class="dhanush-card-meta">{{ movie.release_year }} &bull; ⭐ {{ movie.avg_rating }}</div>
+                    <div class="dhanush-play-btn"><i class="fas fa-play"></i></div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+{% if top10 %}
+<div class="content-section">
+    <div class="section-header">
+        <span class="section-title">🏆 Top 10 Today</span>
+    </div>
+    <div class="cards-scroll">
+        {% for movie in top10 %}
+        <a href="{% url 'movie_detail' movie.pk %}" class="top10-card">
+            <span class="top10-number">{{ forloop.counter }}</span>
+            {% if movie.thumbnail %}
+            <img src="{{ movie.thumbnail.url }}" alt="{{ movie.title }}" class="top10-img">
+            {% else %}
+            <div class="top10-no-img">{{ movie.title }}</div>
+            {% endif %}
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<div style="padding-bottom:60px;"></div>
+{% endblock %}
+
+

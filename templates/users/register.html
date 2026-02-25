@@ -1,0 +1,23 @@
+﻿{% extends 'base.html' %}
+{% block auth_content %}
+<div class="auth-page">
+    <a href="/" class="auth-logo">CARTMATION</a>
+    <div class="auth-box">
+        <h2>Sign Up</h2>
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-danger py-2">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+        <form method="post">
+            {% csrf_token %}
+            <input type="text" name="username" class="form-control auth-input" placeholder="Username" required>
+            <input type="email" name="email" class="form-control auth-input" placeholder="Email address" required>
+            <input type="password" name="password1" class="form-control auth-input" placeholder="Password" required>
+            <input type="password" name="password2" class="form-control auth-input" placeholder="Confirm Password" required>
+            <button type="submit" class="btn-auth">Create Account</button>
+        </form>
+        <p class="text-muted mt-4 text-center" style="font-size:0.9rem;">Already have an account? <a href="{% url 'login' %}" style="color:#1db954; font-weight:700;">Sign in.</a></p>
+    </div>
+</div>
+{% endblock %}

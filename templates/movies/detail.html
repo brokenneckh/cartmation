@@ -1,0 +1,201 @@
+﻿{% extends 'base.html' %}
+{% block title %}{{ movie.title }} - Cartmation{% endblock %}
+{% block content %}
+
+<div class="detail-hero" style="background-image: url('{% if movie.banner %}{{ movie.banner.url }}{% elif movie.thumbnail %}{{ movie.thumbnail.url }}{% else %}https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1200&q=80{% endif %}');"></div>
+
+<div class="detail-content">
+    <div class="row">
+        <div class="col-lg-8">
+            <h1 class="fw-bold fs-2 mb-2">{{ movie.title }}</h1>
+            <div class="d-flex align-items-center gap-3 mb-3 flex-wrap">
+                <span style="color:#1db954;" class="fw-bold">⭐ {{ movie.avg_rating }}/5</span>
+                <span style="color:#b3b3b3;">{{ movie.release_year }}</span>
+                {% if movie.duration %}<span style="color:#b3b3b3;">{{ movie.duration }}</span>{% endif %}
+                <span class="badge bg-secondary">{{ movie.get_content_type_display }}</span>
+            </div>
+            <div class="mb-3">
+                {% for genre in movie.genre.all %}
+                <span class="badge-genre">{{ genre.name }}</span>
+                {% endfor %}
+            </div>
+            <p style="color:#b3b3b3; line-height:1.7; font-size:0.95rem;" class="mb-4">{{ movie.description }}</p>
+
+            <!-- Action Buttons -->
+            <div class="d-flex gap-3 flex-wrap mb-4">
+                <a href="{% url 'watch_movie' movie.pk %}" class="btn-play">
+                    <i class="fas fa-play"></i> Play
+                </a>
+                {% if movie.trailer_url %}
+                <button class="btn-info" data-bs-toggle="modal" data-bs-target="#trailerModal" style="cursor:pointer;">
+                    <i class="fas fa-film"></i> Trailer
+                </button>
+                {% endif %}
+                <button class="topbar-btn like-btn" data-movie="{{ movie.pk }}" data-action="like" id="likeBtn">
+                    <i class="fas fa-thumbs-up"></i> <span id="likesCount">{{ movie.likes_count }}</span>
+                </button>
+                <button class="topbar-btn like-btn" data-movie="{{ movie.pk }}" data-action="dislike" id="dislikeBtn">
+                    <i class="fas fa-thumbs-down"></i> <span id="dislikesCount">{{ movie.dislikes_count }}</span>
+                </button>
+            </div>
+
+            <!-- Star Rating -->
+            <div class="mb-4">
+                <p style="color:#6a6a6a; font-size:0.8rem; margin-bottom:8px;">RATE THIS TITLE</p>
+                <div class="d-flex gap-2">
+                    {% for i in "12345" %}
+                    <i class="fas fa-star fs-5 rating-star-btn {% if user_rating and user_rating.score >= forloop.counter %}text-warning{% else %}text-muted{% endif %}"
+                       data-score="{{ forloop.counter }}" data-movie="{{ movie.pk }}" style="cursor:pointer;"></i>
+                    {% endfor %}
+                </div>
+                <small style="color:#6a6a6a;" class="mt-1 d-block" id="rating-msg">
+                    {% if user_rating %}You rated this {{ user_rating.score }}/5{% else %}Click to rate{% endif %}
+                </small>
+            </div>
+        </div>
+        <div class="col-lg-4 mt-4 mt-lg-0">
+            {% if movie.thumbnail %}
+            <img src="{{ movie.thumbnail.url }}" alt="{{ movie.title }}" class="img-fluid rounded-3">
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Episodes -->
+    {% if movie.seasons.exists %}
+    <div class="mt-5">
+        <h4 class="fw-bold mb-3">Episodes</h4>
+        {% for season in movie.seasons.all %}
+        <h6 style="color:#1db954;" class="mt-3">Season {{ season.season_number }}{% if season.title %}: {{ season.title }}{% endif %}</h6>
+        <div class="list-group list-group-flush">
+            {% for episode in season.episodes.all %}
+            <div class="list-group-item bg-transparent border-0 text-white d-flex justify-content-between align-items-center px-0 py-2" style="border-bottom:1px solid #282828 !important;">
+                <div>
+                    <span class="fw-bold me-2" style="color:#1db954;">{{ episode.episode_number }}.</span>{{ episode.title }}
+                    {% if episode.description %}<p style="color:#6a6a6a; font-size:0.8rem;" class="mb-0 mt-1">{{ episode.description }}</p>{% endif %}
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <span style="color:#6a6a6a; font-size:0.8rem;">{{ episode.duration }}</span>
+                    {% if episode.video_url %}
+                    <a href="{{ episode.video_url }}" target="_blank" class="btn-play" style="padding:8px 16px; font-size:0.8rem;"><i class="fas fa-play"></i></a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Comments -->
+    <div class="mt-5">
+        <h4 class="fw-bold mb-4">Reviews <span style="color:#6a6a6a; font-size:0.9rem;">({{ comments|length }})</span></h4>
+        <form method="post" class="mb-4">
+            {% csrf_token %}
+            <div class="d-flex gap-3">
+                <div class="sidebar-avatar flex-shrink-0">{{ user.username|first|upper }}</div>
+                <div class="flex-grow-1">
+                    <textarea name="comment" rows="2" class="form-control auth-input" placeholder="Write a review..." maxlength="500" required></textarea>
+                    <button type="submit" class="btn-green mt-2 px-4 py-2 rounded-pill border-0" style="font-size:0.85rem;">Post Review</button>
+                </div>
+            </div>
+        </form>
+        {% for comment in comments %}
+        <div class="comment-box d-flex gap-3">
+            <div class="sidebar-avatar flex-shrink-0">
+                {% if comment.user.avatar %}
+                <img src="{{ comment.user.avatar.url }}" style="width:100%;height:100%;object-fit:cover;">
+                {% else %}{{ comment.user.username|first|upper }}{% endif %}
+            </div>
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <span class="fw-bold" style="font-size:0.9rem;">{{ comment.user.username }}</span>
+                    <small style="color:#6a6a6a;">{{ comment.created_at|timesince }} ago</small>
+                </div>
+                <p class="mb-0" style="color:#b3b3b3; font-size:0.9rem;">{{ comment.text }}</p>
+            </div>
+        </div>
+        {% empty %}
+        <p style="color:#6a6a6a;">No reviews yet. Be the first!</p>
+        {% endfor %}
+    </div>
+
+    <!-- Related -->
+    {% if related %}
+    <div class="mt-5">
+        <h4 class="fw-bold mb-3">More Like This</h4>
+        <div class="cards-scroll">
+            {% for m in related %}
+            <a href="{% url 'movie_detail' m.pk %}" class="poster-card">
+                {% if m.thumbnail %}<img src="{{ m.thumbnail.url }}" alt="{{ m.title }}" class="poster-card-img">
+                {% else %}<div class="poster-card-no-img">{{ m.title }}</div>{% endif %}
+                <div class="poster-card-body">
+                    <div class="poster-card-title">{{ m.title }}</div>
+                    <div class="poster-card-meta">{{ m.release_year }} &bull; ⭐ {{ m.avg_rating }}</div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% if movie.trailer_url %}
+<div class="modal fade" id="trailerModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content border-0" style="background:#0a0a0a;">
+            <div class="modal-header border-0">
+                <h5 class="modal-title text-white">{{ movie.title }} - Trailer</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" id="closeTrailer"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="ratio ratio-16x9">
+                    <iframe id="trailerFrame" src="{{ movie.trailer_url }}" allowfullscreen style="border:none;"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>document.getElementById('closeTrailer').addEventListener('click',function(){var f=document.getElementById('trailerFrame');f.src=f.src;});</script>
+{% endif %}
+
+<script>
+var csrfToken = '{{ csrf_token }}';
+document.querySelectorAll('.rating-star-btn').forEach(function(star) {
+    star.addEventListener('mouseenter', function() {
+        var score = this.dataset.score;
+        document.querySelectorAll('.rating-star-btn').forEach(function(s) {
+            s.classList.toggle('text-warning', s.dataset.score <= score);
+            s.classList.toggle('text-muted', s.dataset.score > score);
+        });
+    });
+    star.addEventListener('mouseleave', function() {
+        var userScore = {{ user_rating.score|default:0 }};
+        document.querySelectorAll('.rating-star-btn').forEach(function(s) {
+            s.classList.toggle('text-warning', s.dataset.score <= userScore);
+            s.classList.toggle('text-muted', s.dataset.score > userScore);
+        });
+    });
+    star.addEventListener('click', function() {
+        fetch('/movie/'+this.dataset.movie+'/rate/', {
+            method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded','X-CSRFToken':csrfToken},
+            body:'score='+this.dataset.score
+        }).then(r=>r.json()).then(data=>{
+            if(data.success) document.getElementById('rating-msg').textContent='You rated this '+data.score+'/5 ⭐';
+        });
+    });
+});
+document.querySelectorAll('.like-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        fetch('/movie/'+this.dataset.movie+'/like/', {
+            method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded','X-CSRFToken':csrfToken},
+            body:'action='+this.dataset.action
+        }).then(r=>r.json()).then(data=>{
+            if(data.success){
+                document.getElementById('likesCount').textContent=data.likes;
+                document.getElementById('dislikesCount').textContent=data.dislikes;
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,28 @@
+﻿{% extends 'base.html' %}
+{% block auth_content %}
+<div class="profiles-page">
+    <h1 class="fw-bold mb-5 fs-2">Who's watching?</h1>
+    <div class="d-flex gap-4 flex-wrap justify-content-center mb-5">
+        {% for profile in profiles %}
+        <a href="{% url 'watchlist' profile.id %}" class="text-decoration-none profile-card">
+            <div class="profile-avatar">
+                {% if profile.avatar %}
+                <img src="{{ profile.avatar.url }}" class="w-100 h-100 rounded" style="object-fit:cover;">
+                {% else %}
+                <i class="fas fa-user text-white"></i>
+                {% endif %}
+            </div>
+            <span class="profile-name">{{ profile.name }}</span>
+            {% if profile.is_kids %}<span class="badge bg-warning text-dark">Kids</span>{% endif %}
+        </a>
+        {% endfor %}
+        <a href="{% url 'create_profile' %}" class="text-decoration-none profile-card">
+            <div class="profile-avatar" style="background:#282828;">
+                <i class="fas fa-plus text-white"></i>
+            </div>
+            <span class="profile-name">Add Profile</span>
+        </a>
+    </div>
+    <a href="{% url 'home' %}" class="topbar-btn">Go to Home</a>
+</div>
+{% endblock %}

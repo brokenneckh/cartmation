@@ -1,0 +1,24 @@
+﻿{% extends 'base.html' %}
+{% block title %}{{ genre.name }} - Cartmation{% endblock %}
+{% block content %}
+<div class="content-section">
+    <div class="section-header">
+        <span class="section-title">{{ genre.name }}</span>
+    </div>
+</div>
+<div class="browse-grid">
+    {% for movie in movies %}
+    <a href="{% url 'movie_detail' movie.pk %}" class="poster-card" style="flex:unset; width:100%;">
+        {% if movie.thumbnail %}
+        <img src="{{ movie.thumbnail.url }}" alt="{{ movie.title }}" class="poster-card-img">
+        {% else %}
+        <div class="poster-card-no-img">{{ movie.title }}</div>
+        {% endif %}
+        <div class="poster-card-body">
+            <div class="poster-card-title">{{ movie.title }}</div>
+            <div class="poster-card-meta">{{ movie.release_year }} &bull; ⭐ {{ movie.avg_rating }}</div>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% endblock %}

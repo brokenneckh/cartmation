@@ -1,0 +1,74 @@
+﻿{% extends 'base.html' %}
+{% block title %}Watch {{ movie.title }} - Cartmation{% endblock %}
+{% block content %}
+<div style="background:#000; min-height:100vh; padding-top:0;">
+
+    <!-- Watch Bar -->
+    <div style="background:#111; padding:12px 24px; display:flex; align-items:center; justify-content:space-between;">
+        <a href="{% url 'movie_detail' movie.pk %}" style="color:#fff; text-decoration:none; display:flex; align-items:center; gap:8px;">
+            <i class="fas fa-arrow-left"></i> Back
+        </a>
+        <span style="font-weight:700; font-size:1.1rem;">{{ movie.title }}</span>
+        <span style="color:#1db954; font-weight:900; font-size:1.2rem;">CARTMATION</span>
+    </div>
+
+    <!-- Video Player -->
+    <div style="width:100%; background:#000;">
+        {% if movie.video_url %}
+            {% if 'youtube' in movie.video_url or 'youtu.be' in movie.video_url %}
+            <div style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden;">
+                <iframe src="{{ movie.video_url }}"
+                    style="position:absolute; top:0; left:0; width:100%; height:100%; border:none;"
+                    allowfullscreen allow="encrypted-media"></iframe>
+            </div>
+            {% else %}
+            <video controls style="width:100%; max-height:85vh; background:#000;">
+                <source src="{{ movie.video_url }}">
+                Your browser does not support the video tag.
+            </video>
+            {% endif %}
+        {% elif movie.trailer_url %}
+            <div style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden;">
+                <iframe src="{{ movie.trailer_url }}"
+                    style="position:absolute; top:0; left:0; width:100%; height:100%; border:none;"
+                    allowfullscreen allow="encrypted-media"
+                    referrerpolicy="strict-origin-when-cross-origin"></iframe>
+            </div>
+        {% else %}
+            <div style="display:flex; align-items:center; justify-content:center; height:60vh; flex-direction:column; gap:20px;">
+                <i class="fas fa-film" style="font-size:5rem; color:#333;"></i>
+                <h3 style="color:#fff;">Video not available</h3>
+                <p style="color:#6a6a6a; text-align:center; max-width:400px;">
+                    No video source has been added for <strong>{{ movie.title }}</strong> yet.
+                </p>
+                <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
+                    <a href="{% url 'movie_detail' movie.pk %}" class="btn-play">
+                        <i class="fas fa-arrow-left"></i> Go Back
+                    </a>
+                    <a href="https://www.youtube.com/results?search_query={{ movie.title|urlencode }}+trailer"
+                       target="_blank" class="btn-info">
+                        <i class="fab fa-youtube"></i> Search on YouTube
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Movie Info -->
+    <div style="padding:24px 4%;">
+        <h2 style="font-weight:900; margin-bottom:8px;">{{ movie.title }}</h2>
+        <div style="display:flex; gap:16px; margin-bottom:12px; flex-wrap:wrap;">
+            <span style="color:#1db954; font-weight:700;">⭐ {{ movie.avg_rating }}/5</span>
+            <span style="color:#6a6a6a;">{{ movie.release_year }}</span>
+            {% if movie.duration %}<span style="color:#6a6a6a;">{{ movie.duration }}</span>{% endif %}
+            <span class="badge bg-secondary">{{ movie.get_content_type_display }}</span>
+        </div>
+        <div style="margin-bottom:16px;">
+            {% for genre in movie.genre.all %}
+            <span class="badge-genre">{{ genre.name }}</span>
+            {% endfor %}
+        </div>
+        <p style="color:#b3b3b3; line-height:1.7; max-width:800px;">{{ movie.description }}</p>
+    </div>
+</div>
+{% endblock %}

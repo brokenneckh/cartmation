@@ -1,0 +1,18 @@
+﻿{% extends 'base.html' %}
+{% block auth_content %}
+<div class="profiles-page">
+    <div class="auth-box">
+        <h2 class="mb-4">Create Profile</h2>
+        <form method="post">
+            {% csrf_token %}
+            <input type="text" name="name" class="form-control auth-input" placeholder="Profile Name" required>
+            <div class="form-check mb-3 mt-2">
+                <input class="form-check-input" type="checkbox" name="is_kids" id="isKids">
+                <label class="form-check-label" style="color:#b3b3b3;" for="isKids">Kids Profile</label>
+            </div>
+            <button type="submit" class="btn-auth">Create</button>
+        </form>
+        <a href="{% url 'profile_list' %}" class="topbar-btn d-block text-center mt-3">Cancel</a>
+    </div>
+</div>
+{% endblock %}
