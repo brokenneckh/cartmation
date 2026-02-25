@@ -1,4 +1,4 @@
-﻿# Cartmation - Netflix Clone 🎬
+﻿# Cartmation 
 
 A Netflix-inspired streaming platform built with Django.
 
